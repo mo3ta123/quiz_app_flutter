@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/question_tile.dart';
+import 'questions_list.dart';
+import 'get_data.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,6 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Quiz',
       theme: ThemeData(
         // This is the theme of your application.
@@ -25,90 +27,88 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var _index = 1;
-
+  QuestionList? questionList;
+  var _result = 0;
+  final numberOfQuestions = 5;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            QuestionTile(
-              jsonMap: {
-                'incorrect_answers': ['bell', 'hell'],
-                'correct_answer': 'sldfj',
-                'question': 'how is the weather'
-              },
+            SingleChildScrollView(
+              child: FutureBuilder(
+                future: getQuestions(numberOfQuestions),
+                builder: (context, snapshot) {
+                  if (questionList != null) return questionList!;
+
+                  final list = snapshot.data as List<dynamic>;
+
+                  questionList = QuestionList(list: list);
+                  return questionList!;
+                },
+              ),
             ),
-            QuestionTile(
-              jsonMap: {
-                'incorrect_answers': ['bell', 'hell'],
-                'correct_answer': 'sldfj',
-                'question': 'how is the weather'
-              },
-            ),
-            QuestionTile(
-              jsonMap: {
-                'incorrect_answers': ['bell', 'hell'],
-                'correct_answer': 'sldfj',
-                'question': 'how is the weather'
-              },
-            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Text(
+                    'Result :',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                  const SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    '$_result/$numberOfQuestions',
+                    style: Theme.of(context).textTheme.headline5,
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _result = questionList!.getResult;
+                      });
+                    },
+                    style: ButtonStyle(
+                      fixedSize:
+                          MaterialStateProperty.all<Size>(const Size(150, 55)),
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(Colors.grey[700]!),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(7.0),
+                        ),
+                      ),
+                    ),
+                    child: const Text(
+                      "Summit",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
           ],
         ),
       ),
-      // child: Column(
-      //   children: [
-      //     Radio(
-      //       value: _index,
-      //       groupValue: 0,
-      //       onChanged: (value) {
-      //         setState(
-      //           () {
-      //             _index = 0;
-      //           },
-      //         );
-      //       },
-      //     ),
-      //     Radio(
-      //       value: _index,
-      //       groupValue: 1,
-      //       onChanged: (value) {
-      //         setState(
-      //           () {
-      //             _index = 1;
-      //           },
-      //         );
-      //       },
-      //     ),
-      //     Radio(
-      //       value: _index,
-      //       groupValue: 2,
-      //       onChanged: (value) {
-      //         setState(
-      //           () {
-      //             _index = 2;
-      //           },
-      //         );
-      //       },
-      //     ),
-      //   ],
-      // ),
-    ));
+    );
   }
 }
 

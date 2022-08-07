@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class QuestionTile extends StatefulWidget {
   late final String _correctAnswer;
-  late final List<String> _answers;
+  late final List<dynamic> _answers;
   late final String _question;
 
   final _random = Random();
@@ -12,18 +12,25 @@ class QuestionTile extends StatefulWidget {
 
   QuestionTile({Key? key, required Map<String, dynamic> jsonMap})
       : super(key: key) {
-    _answers = jsonMap['incorrect_answers'] as List<String>;
+    _answers = jsonMap['incorrect_answers'] as List<dynamic>;
     _correctAnswer = jsonMap['correct_answer'] as String;
     _answers.insert(_next(0, _answers.length), _correctAnswer);
     _question = jsonMap['question'];
   }
+  final state = _QuestionTiletState();
+  bool get isCorrectChoice => state.isCorrectChoice;
   @override
-  State<QuestionTile> createState() => _QuestionTiletState();
+  // ignore: no_logic_in_create_state
+  State<QuestionTile> createState() => state;
 }
 
 class _QuestionTiletState extends State<QuestionTile> {
   var _index = -1;
-  bool get isCorrectChoice => widget._answers[_index] == widget._correctAnswer;
+  bool get isCorrectChoice {
+    //print('${widget._correctAnswer}, ${widget._answers[_index - 1]}');
+    return _index > 0 && widget._answers[_index - 1] == widget._correctAnswer;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
